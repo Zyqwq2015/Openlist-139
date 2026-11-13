@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Openlist-139 · 一键导入中国移动云盘</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2322c55e'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='26' font-weight='bold' text-anchor='middle' fill='%23052e16'%3E139%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">139</div>
+      <div class="brand-text">
+        <h1>Openlist-139</h1>
+        <p>一键导入中国移动云盘到 OpenList</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="pill idle" id="browserPill">浏览器未启动</span>
+      <button class="btn ghost small" id="quitBtn" title="关闭工具并退出浏览器">退出</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="card-head">
+        <span class="step-no">1</span>
+        <div class="card-title">
+          <h2>登录中国移动云盘</h2>
+          <p>在打开的独立窗口中登录。工具会自动抓取 Authorization 和 Cookie，只保存在本机内存。</p>
+        </div>
+        <span class="pill idle" id="loginPill">等待登录</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="loginBtn">打开登录窗口</button>
+        <button class="btn" id="mailBtn" title="如果只想用邮箱 Cookie 登录，可打开 139 邮箱登录页补抓 Cookie">补抓邮箱 Cookie</button>
+        <button class="btn" id="refreshBtn">刷新抓取</button>
+      </div>
+
+      <div class="capture-grid">
+        <div class="cap"><span>Authorization</span><strong id="capAuth">未捕获</strong></div>
+        <div class="cap"><span>邮箱 Cookie</span><strong id="capMail">未捕获</strong></div>
+        <div class="cap"><span>全部 Cookie</span><strong id="capAll">0 项</strong></div>
+        <div class="cap"><span>用户域 ID</span><strong id="capUd">未捕获</strong></div>
+      </div>
+
+      <div class="hint" id="browserHint"></div>
+      <div class="tip">
+        提示：登录成功后无需手动复制任何内容。若浏览器窗口没弹出，请检查是否被安全软件拦截，或点击“刷新抓取”。
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="step-no">2</span>
+        <div class="card-title">
+          <h2>连接 OpenList</h2>
+          <p>填写你的 OpenList 地址和管理员 Token。也可以直接用管理员账号密码获取 Token。</p>
+        </div>
+        <span class="pill idle" id="olPill">未连接</span>
+      </div>
+
+      <div class="grid-2">
+        <label class="field">
+          <span>OpenList 地址</span>
+          <input id="olUrl" type="text" spellcheck="false" placeholder="http://192.168.1.10:5244">
+        </label>
+        <label class="field">
+          <span>管理员 Token</span>
+          <div class="input-row">
+            <input id="olToken" type="password" spellcheck="false" placeholder="OpenList 后台 → 设置 → 其他 → Token">
+            <button class="mini" id="toggleToken" type="button">显示</button>
+          </div>
+        </label>
+      </div>
+
+      <details class="sub">
+        <summary>没有 Token？用管理员账号密码自动获取</summary>
+        <div class="grid-3">
+          <label class="field">
+            <span>用户名</span>
+            <input id="olUser" type="text" spellcheck="false" placeholder="admin" autocomplete="username">
+          </label>
+          <label class="field">
+            <span>密码</span>
+            <input id="olPass" type="password" spellcheck="false" placeholder="管理员密码" autocomplete="current-password">
+          </label>
+          <label class="field">
+            <span>两步验证码 <em>可选</em></span>
+            <input id="olOtp" type="text" spellcheck="false" placeholder="6 位动态码" inputmode="numeric">
+          </label>
+        </div>
+        <div class="actions tight">
+          <button class="btn" id="loginTokenBtn">获取 Token</button>
+          <span class="muted">密码只发送给你填写的 OpenList，不会离开本机。</span>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button class="btn" id="testBtn">测试连接</button>
+        <label class="check"><input type="checkbox" id="ignoreCert"> 忽略 HTTPS 证书错误（自签名证书）</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="step-no">3</span>
+        <div class="card-title">
+          <h2>挂载设置</h2>
+          <p>默认挂载到 <code>/139</code>，使用“新的个人盘”即可。子文件夹可填文件夹 ID。</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <label class="field">
+          <span>挂载路径</span>
+          <input id="mountPath" type="text" spellcheck="false" placeholder="/139">
+        </label>
+        <label class="field">
+          <span>存储类型</span>
+          <select id="storageType">
+            <option value="personal_new">新的个人盘（推荐）</option>
+            <option value="personal">个人云（旧版）</option>
+            <option value="family">家庭云</option>
+            <option value="group">共享群</option>
+            <option value="share">分享挂载</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid-2">
+        <label class="field">
+          <span>根文件夹 ID <em>可选</em></span>
+          <div class="input-row">
+            <input id="rootFolderId" type="text" spellcheck="false" placeholder="留空 = 根目录">
+            <button class="mini" id="useCurrentFolder" type="button" title="使用刚刚浏览的云盘文件夹 ID">用当前文件夹</button>
+          </div>
+        </label>
+        <label class="field" id="cloudIdField" hidden>
+          <span>Cloud ID <em>家庭云 / 共享群必填</em></span>
+          <input id="cloudId" type="text" spellcheck="false" placeholder="cloudID / groupID">
+        </label>
+      </div>
+
+      <div class="grid-2">
+        <label class="field" id="linkIdField" hidden>
+          <span>分享链接 ID <em>share 类型必填</em></span>
+          <input id="linkId" type="text" spellcheck="false" placeholder="link_id#密码,link_id2">
+        </label>
+        <label class="field">
+          <span>客户端类型</span>
+          <select id="clientType">
+            <option value="web">web（单文件上限 50 GB）</option>
+            <option value="pc">pc（单文件上限 500 GB）</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>备注 <em>可选</em></span>
+        <input id="remark" type="text" spellcheck="false" placeholder="例如：中国移动云盘">
+      </label>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="step-no">4</span>
+        <div class="card-title">
+          <h2>抓取结果</h2>
+          <p>已自动填入，可手动修改。Authorization 只填 <code>Basic</code> 后面的内容。</p>
+        </div>
+        <button class="btn ghost small" id="copyAllBtn">复制配置</button>
+      </div>
+
+      <label class="field">
+        <span>Authorization</span>
+        <textarea id="authValue" rows="3" spellcheck="false" data-auto="0" placeholder="登录后自动抓取，也可手动粘贴"></textarea>
+      </label>
+
+      <label class="field">
+        <span>邮箱 Cookie（mail.10086.cn）</span>
+        <textarea id="mailValue" rows="3" spellcheck="false" data-auto="0" placeholder="key1=value1; key2=value2"></textarea>
+      </label>
+
+      <label class="field">
+        <span>用户域 ID（ud_id）<em>可选</em></span>
+        <input id="udId" type="text" spellcheck="false" data-auto="0" placeholder="用于显示容量统计">
+      </label>
+
+      <details class="sub">
+        <summary>查看全部 Cookie（139.com + 10086.cn）</summary>
+        <textarea id="allCookieValue" rows="4" readonly spellcheck="false" placeholder="登录后自动抓取"></textarea>
+      </details>
+    </section>
+
+    <section class="import-card">
+      <div class="import-text">
+        <h2>一键导入</h2>
+        <p>在 OpenList 中创建或更新 139Yun 存储。若挂载路径已存在，会自动更新。</p>
+      </div>
+      <button class="btn primary big" id="importBtn">一键导入到 OpenList</button>
+    </section>
+
+    <section class="result hidden" id="result"></section>
+
+    <footer class="footer">
+      <span>Openlist-139 v1.0.0</span>
+      <span>所有授权信息仅保存在本机内存，退出即清除 · 请勿把 Authorization 分享给他人</span>
+    </footer>
+  </main>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

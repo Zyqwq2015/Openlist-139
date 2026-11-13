@@ -1,0 +1,19 @@
+# 运行日志与本地数据
+*.log
+
+# 构建中间产物
+bin/
+obj/
+*.pdb
+*.user
+
+# 编辑器 / 系统文件
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 测试产物
+/t.cs
+/t.exe
