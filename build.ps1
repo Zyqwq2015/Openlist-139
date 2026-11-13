@@ -1,4 +1,4 @@
-# 需要 .NET Framework 4.x（Windows 10/11 自带）与系统自带的 csc.exe
+﻿# 需要 .NET Framework 4.x（Windows 10/11 自带）与系统自带的 csc.exe
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
